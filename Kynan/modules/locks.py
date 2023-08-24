@@ -98,8 +98,6 @@ def restr_members(
     bot, chat_id, members, messages=False, media=False, other=False, previews=False
 ):
     for mem in members:
-        if mem.user in DRAGONS:
-            pass
         try:
             bot.restrict_chat_member(
                 chat_id,
@@ -157,13 +155,13 @@ def lock(update, context) -> str:
         if len(args) >= 1:
             ltype = args[0].lower()
             if ltype in LOCK_TYPES:
-                # Connection check
-                conn = connected(context.bot, update, chat, user.id, need_admin=True)
-                if conn:
+                if conn := connected(
+                    context.bot, update, chat, user.id, need_admin=True
+                ):
                     chat = dispatcher.bot.getChat(conn)
                     chat_id = conn
                     chat_name = chat.title
-                    text = "Locked {} for non-admins in {}!".format(ltype, chat_name)
+                    text = f"Locked {ltype} for non-admins in {chat_name}!"
                 else:
                     if update.effective_message.chat.type == "private":
                         send_message(
@@ -174,31 +172,20 @@ def lock(update, context) -> str:
                     chat = update.effective_chat
                     chat_id = update.effective_chat.id
                     chat_name = update.effective_message.chat.title
-                    text = "Locked {} for non-admins!".format(ltype)
+                    text = f"Locked {ltype} for non-admins!"
                 sql.update_lock(chat.id, ltype, locked=True)
                 send_message(update.effective_message, text, parse_mode="markdown")
 
-                return (
-                    "<b>{}:</b>"
-                    "\n#LOCK"
-                    "\n<b>Admin:</b> {}"
-                    "\nLocked <code>{}</code>.".format(
-                        html.escape(chat.title),
-                        mention_html(user.id, user.first_name),
-                        ltype,
-                    )
-                )
+                return f"<b>{html.escape(chat.title)}:</b>\n#LOCK\n<b>Admin:</b> {mention_html(user.id, user.first_name)}\nLocked <code>{ltype}</code>."
 
             elif ltype in LOCK_CHAT_RESTRICTION:
-                # Connection check
-                conn = connected(context.bot, update, chat, user.id, need_admin=True)
-                if conn:
+                if conn := connected(
+                    context.bot, update, chat, user.id, need_admin=True
+                ):
                     chat = dispatcher.bot.getChat(conn)
                     chat_id = conn
                     chat_name = chat.title
-                    text = "Terkunci {} untuk semua non-admin di {}!".format(
-                        ltype, chat_name
-                    )
+                    text = f"Terkunci {ltype} untuk semua non-admin di {chat_name}!"
                 else:
                     if update.effective_message.chat.type == "private":
                         send_message(

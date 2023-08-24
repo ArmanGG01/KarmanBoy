@@ -20,16 +20,16 @@ def staff(client: Client, message: Message):
             co_founder.append(
                 f" <b>├</b> <a href='tg://user?id={x.user.id}'>{x.user.first_name}</a> <i>- {title}</i>"
             )
-        elif x.status == "administrator" and x.can_promote_members and not x.title:
+        elif x.status == "administrator" and x.can_promote_members:
             co_founder.append(
                 f" <b>├</b> <a href='tg://user?id={x.user.id}'>{x.user.first_name}</a>"
             )
-        elif x.status == "administrator" and not x.can_promote_members and x.title:
+        elif x.status == "administrator" and x.title:
             title = escape(x.title)
             admin.append(
                 f" <b>├</b> <a href='tg://user?id={x.user.id}'>{x.user.first_name}</a> <i>- {title}</i>"
             )
-        elif x.status == "administrator" and not x.can_promote_members and not x.title:
+        elif x.status == "administrator":
             admin.append(
                 f" <b>├</b> <a href='tg://user?id={x.user.id}'>{x.user.first_name}</a>"
             )
@@ -38,18 +38,18 @@ def staff(client: Client, message: Message):
             creator.append(
                 f" <b>└</b> <a href='tg://user?id={x.user.id}'>{x.user.first_name}</a> <i>- {title}</i>"
             )
-        elif x.status == "creator" and not x.title:
+        elif x.status == "creator":
             creator.append(
                 f" <b>└</b> <a href='tg://user?id={x.user.id}'>{x.user.first_name}</a>"
             )
 
-    if len(co_founder) == 0 and len(admin) == 0:
+    if not co_founder and not admin:
         result = (
             f"Admins on <b>{chat_title}</b>\n\n🤴 <b>Group Founder</b>\n"
             + "\n".join(creator)
         )
 
-    elif len(co_founder) == 0 and len(admin) > 0:
+    elif not co_founder and len(admin) > 0:
         res_admin = admin[-1].replace("├", "└")
         admin.pop(-1)
         admin.append(res_admin)
@@ -60,7 +60,7 @@ def staff(client: Client, message: Message):
             "👮‍♂ <b>Admin</b>\n" + "\n".join(admin)
         )
 
-    elif len(co_founder) > 0 and len(admin) == 0:
+    elif len(co_founder) > 0 and not admin:
         resco_founder = co_founder[-1].replace("├", "└")
         co_founder.pop(-1)
         co_founder.append(resco_founder)

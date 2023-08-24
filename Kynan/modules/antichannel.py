@@ -18,15 +18,16 @@ def set_antichannel(update: Update, context: CallbackContext):
         s = args[0].lower()
         if s in ["yes", "on"]:
             enable_antichannel(chat.id)
-            message.reply_html("AntiChannel diaktifkan di {}".format(html.escape(chat.title)))
+            message.reply_html(f"AntiChannel diaktifkan di {html.escape(chat.title)}")
         elif s in ["off", "no"]:
             disable_antichannel(chat.id)
-            message.reply_html("Nonaktifkan antichannel di {}".format(html.escape(chat.title)))
+            message.reply_html(f"Nonaktifkan antichannel di {html.escape(chat.title)}")
         else:
-            message.reply_text("Argumen tidak dikenal {}".format(s))
+            message.reply_text(f"Argumen tidak dikenal {s}")
         return
     message.reply_html(
-        "Pengaturan antichannel saat ini {} in {}".format(antichannel_status(chat.id), html.escape(chat.title)))
+        f"Pengaturan antichannel saat ini {antichannel_status(chat.id)} in {html.escape(chat.title)}"
+    )
 
 @Kynanmsg(Filters.chat_type.groups, group=110)
 def eliminate_channel(update: Update, context: CallbackContext):

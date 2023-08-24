@@ -141,18 +141,13 @@ def gban(update: Update, context: CallbackContext):
             )
             return
 
-        old_reason = sql.update_gban_reason(
+        if old_reason := sql.update_gban_reason(
             user_id,
             user_chat.username or user_chat.first_name,
             reason,
-        )
-        if old_reason:
+        ):
             message.reply_text(
-                "Pengguna ini sudah diblokir, karena alasan berikut::\n"
-                "<code>{}</code>\n"
-                "Saya telah pergi dan memperbaruinya dengan alasan baru Anda!".format(
-                    html.escape(old_reason),
-                ),
+                f"Pengguna ini sudah diblokir, karena alasan berikut::\n<code>{html.escape(old_reason)}</code>\nSaya telah pergi dan memperbaruinya dengan alasan baru Anda!",
                 parse_mode=ParseMode.HTML,
             )
 
@@ -170,9 +165,9 @@ def gban(update: Update, context: CallbackContext):
     current_time = datetime.utcnow().strftime(datetime_fmt)
 
     if chat.type != "private":
-        chat_origin = "<b>{} ({})</b>\n".format(html.escape(chat.title), chat.id)
+        chat_origin = f"<b>{html.escape(chat.title)} ({chat.id})</b>\n"
     else:
-        chat_origin = "<b>{}</b>\n".format(chat.id)
+        chat_origin = f"<b>{chat.id}</b>\n"
 
     log_message = (
         f"#GBANNED\n"
@@ -219,9 +214,7 @@ def gban(update: Update, context: CallbackContext):
             gbanned_chats += 1
 
         except BadRequest as excp:
-            if excp.message in GBAN_ERRORS:
-                pass
-            else:
+            if excp.message not in GBAN_ERRORS:
                 message.reply_text(f"Could not gban due to: {excp.message}")
                 if EVENT_LOGS:
                     bot.send_message(
@@ -242,7 +235,7 @@ def gban(update: Update, context: CallbackContext):
 
     if EVENT_LOGS:
         log.edit_text(
-            log_message + f"\n<b>Chats affected:</b> <code>{gbanned_chats}</code>",
+            f"{log_message}\n<b>Chats affected:</b> <code>{gbanned_chats}</code>",
             parse_mode=ParseMode.HTML,
         )
     else:
@@ -258,10 +251,7 @@ def gban(update: Update, context: CallbackContext):
 
     if gban_time > 60:
         gban_time = round((gban_time / 60), 2)
-        message.reply_text("Selesai! Gbanned.", parse_mode=ParseMode.HTML)
-    else:
-        message.reply_text("Selesai! Gbanned.", parse_mode=ParseMode.HTML)
-
+    message.reply_text("Selesai! Gbanned.", parse_mode=ParseMode.HTML)
     try:
         bot.send_message(
             user_id,
@@ -349,9 +339,7 @@ def ungban(update: Update, context: CallbackContext):
                 ungbanned_chats += 1
 
         except BadRequest as excp:
-            if excp.message in UNGBAN_ERRORS:
-                pass
-            else:
+            if excp.message not in UNGBAN_ERRORS:
                 message.reply_text(f"Could not un-gban due to: {excp.message}")
                 if EVENT_LOGS:
                     bot.send_message(
@@ -372,7 +360,7 @@ def ungban(update: Update, context: CallbackContext):
 
     if EVENT_LOGS:
         log.edit_text(
-            log_message + f"\n<b>Chats affected:</b> {ungbanned_chats}",
+            f"{log_message}\n<b>Chats affected:</b> {ungbanned_chats}",
             parse_mode=ParseMode.HTML,
         )
     else:
@@ -497,11 +485,7 @@ def gbanstat(update: Update, context: CallbackContext):
             )
     else:
         update.effective_message.reply_text(
-            "Beri saya beberapa argumen untuk memilih pengaturan! on/off, yes/no!\n\n"
-            "Pengaturan Anda saat ini adalah: {}\n"
-            "Ketika Benar, gbans apa pun yang terjadi juga akan terjadi di grup Anda. "
-            "Ketika Salah, mereka tidak akan melakukannya, meninggalkan Anda pada belas kasihan yang mungkin dari "
-            "spammer.".format(sql.does_chat_gban(update.effective_chat.id)),
+            f"Beri saya beberapa argumen untuk memilih pengaturan! on/off, yes/no!\n\nPengaturan Anda saat ini adalah: {sql.does_chat_gban(update.effective_chat.id)}\nKetika Benar, gbans apa pun yang terjadi juga akan terjadi di grup Anda. Ketika Salah, mereka tidak akan melakukannya, meninggalkan Anda pada belas kasihan yang mungkin dari spammer."
         )
 
 

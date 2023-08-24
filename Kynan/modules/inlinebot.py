@@ -201,9 +201,8 @@ async def inline_query_handler(client, query):
                     switch_pm_text="gh | gh [USERNAME]",
                     switch_pm_parameter="inline",
                 )
-            results = []
             gett = text.split(None, 1)[1]
-            text = gett + ' "site:github.com"'
+            text = f'{gett} "site:github.com"'
             gresults = await GoogleSearch().async_search(text, 1)
             result = ""
             for i in range(4):
@@ -215,7 +214,7 @@ async def inline_query_handler(client, query):
                     result += f"`{description}`\n\n"
                 except IndexError:
                     pass
-            results.append(
+            results = [
                 InlineQueryResultArticle(
                     title=f"Results for {gett}",
                     description=f" Github info of {title}\n  Touch to read",
@@ -223,7 +222,7 @@ async def inline_query_handler(client, query):
                         result, disable_web_page_preview=True
                     ),
                 )
-            )
+            ]
             await client.answer_inline_query(query.id, cache_time=0, results=results)
 
 
@@ -304,7 +303,6 @@ async def inline_query_handler(client, query):
             await client.answer_inline_query(query.id, results=answerss, cache_time=2)
 
         elif text.split()[0] == "fakegen":
-            results = []
             fake = Faker()
             name = str(fake.name())
             fake.add_provider(internet)
@@ -316,7 +314,7 @@ async def inline_query_handler(client, query):
             android = fake.android_platform_token()
             pc = fake.chrome()
             res = f"<b><u> Fake Information Generated</b></u>\n<b>Name :-</b><code>{name}</code>\n\n<b>Address:-</b><code>{address}</code>\n\n<b>IP ADDRESS:-</b><code>{ip}</code>\n\n<b>credit card:-</b><code>{cc}</code>\n\n<b>Email Id:-</b><code>{email}</code>\n\n<b>Job:-</b><code>{job}</code>\n\n<b>android user agent:-</b><code>{android}</code>\n\n<b>Pc user agent:-</b><code>{pc}</code>"
-            results.append(
+            results = [
                 InlineQueryResultArticle(
                     title="Fake infomation gathered",
                     description="Click here to see them",
@@ -324,7 +322,7 @@ async def inline_query_handler(client, query):
                         res, parse_mode="HTML", disable_web_page_preview=True
                     ),
                 )
-            )
+            ]
             await client.answer_inline_query(query.id, cache_time=0, results=results)
 
 

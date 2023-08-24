@@ -42,25 +42,24 @@ def report_setting(update: Update, context: CallbackContext):
                 parse_mode=ParseMode.MARKDOWN,
             )
 
-    else:
-        if len(args) >= 1:
-            if args[0] in ("yes", "on"):
-                sql.set_chat_setting(chat.id, True)
-                msg.reply_text(
-                    f"Mengaktifkan pelaporan di {chat.title}!\n\nAdmin yang telah mengaktifkan laporan akan diberi tahu saat `/report` "
-                    "atau @admin disebut.",
-                )
-
-            elif args[0] in ("no", "off"):
-                sql.set_chat_setting(chat.id, False)
-                msg.reply_text(
-                    f"Nonaktifkan pelaporan di {chat.title}!\n\nTidak ada admin yang akan diberitahukan pada `/report` atau @admin.",
-                )
-        else:
+    elif len(args) >= 1:
+        if args[0] in ("yes", "on"):
+            sql.set_chat_setting(chat.id, True)
             msg.reply_text(
-                f"Setelan laporan saat ini adalah: `{sql.chat_should_report(chat.id)}`.\n\nUntuk mengubah pengaturan ini, coba perintah ini lagi, dengan salah satu argumen berikut:: yes/no/on/off",
-                parse_mode=ParseMode.MARKDOWN,
+                f"Mengaktifkan pelaporan di {chat.title}!\n\nAdmin yang telah mengaktifkan laporan akan diberi tahu saat `/report` "
+                "atau @admin disebut.",
             )
+
+        elif args[0] in ("no", "off"):
+            sql.set_chat_setting(chat.id, False)
+            msg.reply_text(
+                f"Nonaktifkan pelaporan di {chat.title}!\n\nTidak ada admin yang akan diberitahukan pada `/report` atau @admin.",
+            )
+    else:
+        msg.reply_text(
+            f"Setelan laporan saat ini adalah: `{sql.chat_should_report(chat.id)}`.\n\nUntuk mengubah pengaturan ini, coba perintah ini lagi, dengan salah satu argumen berikut:: yes/no/on/off",
+            parse_mode=ParseMode.MARKDOWN,
+        )
 
 
 @user_not_admin
@@ -146,7 +145,7 @@ def report(update: Update, context: CallbackContext) -> str:
 
             if sql.user_should_report(admin.user.id):
                 try:
-                    if not chat.type == Chat.SUPERGROUP:
+                    if chat.type != Chat.SUPERGROUP:
                         bot.send_message(
                             admin.user.id,
                             msg + link,
@@ -214,11 +213,11 @@ def __chat_settings__(chat_id, _):
 
 
 def __user_settings__(user_id):
-    if sql.user_should_report(user_id) is True:
-        text = "Anda akan menerima laporan dari obrolan yang Anda kelola."
-    else:
-        text = "Kamu akan *not* menerima laporan dari obrolan yang Anda admin."
-    return text
+    return (
+        "Anda akan menerima laporan dari obrolan yang Anda kelola."
+        if sql.user_should_report(user_id) is True
+        else "Kamu akan *not* menerima laporan dari obrolan yang Anda admin."
+    )
 
 
 def buttons(update: Update, context: CallbackContext):

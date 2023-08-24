@@ -35,12 +35,10 @@ from Kynan.modules.log_channel import gloggable
 def kynanrm(update: Update, context: CallbackContext) -> str:
     query: Optional[CallbackQuery] = update.callback_query
     user: Optional[User] = update.effective_user
-    match = re.match(r"rm_chat\((.+?)\)", query.data)
-    if match:
+    if match := re.match(r"rm_chat\((.+?)\)", query.data):
         user_id = match.group(1)
         chat: Optional[Chat] = update.effective_chat
-        is_kynan = sql.set_kynan(chat.id)
-        if is_kynan:
+        if is_kynan := sql.set_kynan(chat.id):
             is_kynan = sql.set_kynan(user_id)
             return (
                 f"<b>{html.escape(chat.title)}:</b>\n"
@@ -49,9 +47,7 @@ def kynanrm(update: Update, context: CallbackContext) -> str:
             )
         else:
             update.effective_message.edit_text(
-                "{} ᴄʜᴀᴛʙᴏᴛ ᴅɪsᴀʙʟᴇᴅ ʙʏ {}.".format(
-                    dispatcher.bot.first_name, mention_html(user.id, user.first_name)
-                ),
+                f"{dispatcher.bot.first_name} ᴄʜᴀᴛʙᴏᴛ ᴅɪsᴀʙʟᴇᴅ ʙʏ {mention_html(user.id, user.first_name)}.",
                 parse_mode=ParseMode.HTML,
             )
 
@@ -64,12 +60,10 @@ def kynanrm(update: Update, context: CallbackContext) -> str:
 def kynanadd(update: Update, context: CallbackContext) -> str:
     query: Optional[CallbackQuery] = update.callback_query
     user: Optional[User] = update.effective_user
-    match = re.match(r"add_chat\((.+?)\)", query.data)
-    if match:
+    if match := re.match(r"add_chat\((.+?)\)", query.data):
         user_id = match.group(1)
         chat: Optional[Chat] = update.effective_chat
-        is_kynan = sql.rem_kynan(chat.id)
-        if is_kynan:
+        if is_kynan := sql.rem_kynan(chat.id):
             is_kynan = sql.rem_kynan(user_id)
             return (
                 f"<b>{html.escape(chat.title)}:</b>\n"
@@ -78,9 +72,7 @@ def kynanadd(update: Update, context: CallbackContext) -> str:
             )
         else:
             update.effective_message.edit_text(
-                "{} ᴄʜᴀᴛʙᴏᴛ ᴇɴᴀʙʟᴇᴅ ʙʏ {}.".format(
-                    dispatcher.bot.first_name, mention_html(user.id, user.first_name)
-                ),
+                f"{dispatcher.bot.first_name} ᴄʜᴀᴛʙᴏᴛ ᴇɴᴀʙʟᴇᴅ ʙʏ {mention_html(user.id, user.first_name)}.",
                 parse_mode=ParseMode.HTML,
             )
 
@@ -125,8 +117,7 @@ def chatbot(update: Update, context: CallbackContext):
     message = update.effective_message
     chat_id = update.effective_chat.id
     bot = context.bot
-    is_kynan = sql.is_kynan(chat_id)
-    if is_kynan:
+    if is_kynan := sql.is_kynan(chat_id):
         return
 
     if message.text and not message.document:

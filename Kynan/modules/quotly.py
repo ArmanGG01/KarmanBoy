@@ -25,8 +25,7 @@ def set_qrate(chat_id, mode: bool):
 
 
 def get_qrate(chat_id):
-    q = quotly.find_one({"chat_id": chat_id})
-    if q:
+    if q := quotly.find_one({"chat_id": chat_id}):
         return q.get("qrate") or False
     return False
 
@@ -36,10 +35,7 @@ def add_quote(chat_id, quote):
 
 
 def get_quotes(chat_id):
-    q = quotly.find_one({"chat_id": chat_id})
-    if q:
-        return q["quotes"]
-    return False
+    return q["quotes"] if (q := quotly.find_one({"chat_id": chat_id})) else False
 
 
 # =====================================) =))) ========
@@ -147,19 +143,14 @@ async def HasRight(chat_id, user_id, right):
         telethon.tl.functions.channels.GetParticipantRequest(chat_id, user_id)
     )
     p: telethon.tl.types.ChannelParticipant.to_dict
-    if p.participant.admin_rights.to_dict()[right] == True:
-        return True
-    return False
+    return p.participant.admin_rights.to_dict()[right] == True
 
 
 async def getSender(e: telethon.events.NewMessage.Event):
-    if e.sender != None:
-        return e.sender
+    if e.sender is None:
+        return e.sender_chat if e.sender_chat != None else None
     else:
-        if e.sender_chat != None:
-            return e.sender_chat
-        else:
-            return None
+        return e.sender
 
 
 def sizeof_fmt(num, suffix="B"):
@@ -177,8 +168,7 @@ async def bash(code):
         *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
     stdout, stderr = await process.communicate()
-    result = str(stdout.decode().strip()) + str(stderr.decode().strip())
-    return result
+    return str(stdout.decode().strip()) + str(stderr.decode().strip())
 
 
 async def get_reply_image(v):
@@ -188,10 +178,7 @@ async def get_reply_image(v):
     if not r.media:
         return None
     if isinstance(r.media, telethon.tl.types.MessageMediaDocument):
-        if r.media.document.mime_type.split("/")[0] == "image":
-            return r
-        else:
-            return None
+        return r if r.media.document.mime_type.split("/")[0] == "image" else None
     elif isinstance(r.media, telethon.tl.types.MessageMediaPhoto):
         return r
     else:
@@ -200,16 +187,12 @@ async def get_reply_image(v):
 
 async def get_reply_gif(e):
     r = await e.get_reply_message()
-    if not r.gif:
-        return None
-    return r
+    return None if not r.gif else r
 
 
 async def get_reply_video(e):
     r = await e.get_reply_message()
-    if not r.video:
-        return None
-    return r
+    return None if not r.video else r
 
 
 # ) =======================================++=+====)) ============
@@ -277,7 +260,7 @@ async def _url(e):
             REDIRECT_THUMB,
             [Button.switch_inline("ᴛʀʏ ᴀɢᴀɪɴ", "url", True)],
         )
-    URL_STAT = "`ᴜʀʟ sᴛᴀᴛᴜs:` **" + str(r.status_code) + "**"
+    URL_STAT = f"`ᴜʀʟ sᴛᴀᴛᴜs:` **{r.status_code}**"
     URL_STAT += "\n`ᴜʀʟ ᴄᴏɴᴛᴇɴᴛ ᴛʏᴘᴇ:` **" + str(r.headers["Content-Type"]) + "**"
     URL_STAT += "\n`ᴜʀʟ ᴄᴏɴᴛᴇɴᴛ ʟᴇɴɢᴛʜ:` **" + str(r.headers["Content-Length"]) + "**"
     URL_STAT += "\n`ʀᴇsᴘᴏɴsᴇ ᴛɪᴍᴇ:` **" + str(r.elapsed.total_seconds()) + "**"
@@ -285,8 +268,8 @@ async def _url(e):
     URL_STAT += "\n`ɪᴘ ᴀᴅᴅʀᴇss:` **" + str(r.headers["X-Client-IP"]) + "**"
     await answer_query(
         e,
-        "Redirect Link (" + str(r.status_code) + ")",
-        "Redirect Link: " + r.url,
+        f"Redirect Link ({r.status_code})",
+        f"Redirect Link: {r.url}",
         "",
         REDIRECT_THUMB,
         [Button.url("ᴏᴘᴇɴ ᴜʀʟ", r.url)],
@@ -319,7 +302,7 @@ async def _quotly_api_(e):
         d = d.replace(hex_to_name(color) if g == "hex" else color, "")
     else:
         color = "#1b1429"
-    photo = True if "p" in d else False
+    photo = "p" in d
     messages = []
     num = [int(x) for x in d.split() if x.isdigit()]
     num = num[0] if num else None
@@ -370,37 +353,30 @@ async def _quotly_api_(e):
                 "type": "group",
                 "name": _name if c[-1] != _id else "",
             }
-            if len(msgs) == 1:
-                if _x.reply_to and "r" in d:
-                    reply = await _x.get_reply_message()
-                    if isinstance(reply.sender, types.Channel):
-                        _r = {
-                            "chatId": e.chat_id,
-                            "first_name": reply.chat.title,
-                            "last_name": "",
-                            "username": reply.chat.username,
-                            "text": reply.text,
-                            "name": reply.chat.title,
-                        }
-                    elif reply.sender:
-                        name = reply.sender.first_name
-                        name = (
-                            name + " " + reply.sender.last_name
-                            if reply.sender.last_name
-                            else name
-                        )
-                        if reply.fwd_from and reply.fwd_from.from_name:
-                            _name = reply.fwd_from.from_name
-                        _r = {
-                            "chatId": e.chat_id,
-                            "first_name": reply.sender.first_name,
-                            "last_name": "reply.sender.last_name",
-                            "username": reply.sender.username,
-                            "text": reply.text,
-                            "name": name,
-                        }
-                    else:
-                        _r = {}
+            if len(msgs) == 1 and _x.reply_to and "r" in d:
+                reply = await _x.get_reply_message()
+                if isinstance(reply.sender, types.Channel):
+                    _r = {
+                        "chatId": e.chat_id,
+                        "first_name": reply.chat.title,
+                        "last_name": "",
+                        "username": reply.chat.username,
+                        "text": reply.text,
+                        "name": reply.chat.title,
+                    }
+                elif reply.sender:
+                    name = reply.sender.first_name
+                    name = f"{name} {reply.sender.last_name}" if reply.sender.last_name else name
+                    if reply.fwd_from and reply.fwd_from.from_name:
+                        _name = reply.fwd_from.from_name
+                    _r = {
+                        "chatId": e.chat_id,
+                        "first_name": reply.sender.first_name,
+                        "last_name": "reply.sender.last_name",
+                        "username": reply.sender.username,
+                        "text": reply.text,
+                        "name": name,
+                    }
                 else:
                     _r = {}
             else:
@@ -442,7 +418,7 @@ async def _quotly_api_(e):
                         "replyMessage": _r,
                     }
                 )
-            elif media:
+            else:
                 messages.append(
                     {
                         "chatId": e.chat_id,
@@ -467,7 +443,7 @@ async def _quotly_api_(e):
         json=post_data,
     )
     if get_qrate(e.chat_id):
-        cd = str(e.id) + "|" + str(0) + "|" + str(0)
+        cd = f"{str(e.id)}|0|0"
         buttons = buttons = Button.inline("💖", data=f"upq_{cd}"), Button.inline(
             "💔", data=f"doq_{cd}"
         )
@@ -488,7 +464,7 @@ async def _quotly_api_(e):
                 ],
             )
     except Exception as ep:
-        await e.reply("error: " + str(ep))
+        await e.reply(f"error: {str(ep)}")
 
 
 def get_entites(x):
@@ -563,11 +539,11 @@ async def quotly_upvote(e):
         qr[x][1].remove(e.sender_id)
         qr[x][0].append(e.sender_id)
         await e.answer("ʏᴏᴜ 💖 ᴛʜɪs")
-    elif e.sender_id not in ya[0]:
+    else:
         y += 1
         qr[x][0].append(e.sender_id)
         await e.answer("ʏᴏᴜ 💖 ᴛʜɪs")
-    cd = "{}|{}|{}".format(x, y, z)
+    cd = f"{x}|{y}|{z}"
     if y == 0:
         y = ""
     if z == 0:
@@ -599,11 +575,11 @@ async def quotly_downvote(e):
         qr[x][0].remove(e.sender_id)
         qr[x][1].append(e.sender_id)
         await e.answer("ʏᴏᴜ 💔 ᴛʜɪs")
-    elif e.sender_id not in ya[1]:
+    else:
         z += 1
         qr[x][1].append(e.sender_id)
         await e.answer("ʏᴏᴜ 💔 ᴛʜɪs")
-    cd = "{}|{}|{}".format(x, y, z)
+    cd = f"{x}|{y}|{z}"
     if y == 0:
         y = ""
     if z == 0:
@@ -621,7 +597,7 @@ async def qtop_q(e):
     await e.reply(
         "**ᴛᴏᴘ ɢʀᴏᴜᴘ ǫᴜᴏᴛᴇs:**",
         buttons=Button.switch_inline(
-            "ᴏᴘᴇɴ ᴛᴏᴘ", "top:{}".format(e.chat_id), same_peer=True
+            "ᴏᴘᴇɴ ᴛᴏᴘ", f"top:{e.chat_id}", same_peer=True
         ),
     )
 
@@ -637,7 +613,7 @@ async def qtop_cb_(e):
     n = 0
     if get_qrate(e.chat_id):
         qr[e.id] = [[], []]
-        cd = str(e.id) + "|" + str(0) + "|" + str(0)
+        cd = f"{str(e.id)}|0|0"
         xe = True
     for _x in q:
         n += 1
@@ -668,7 +644,7 @@ async def qrand_s_(e):
     c, xe = random.choice(q), False
     if get_qrate(e.chat_id):
         qr[e.id] = [[], []]
-        cd = str(e.id) + "|" + str(0) + "|" + str(0)
+        cd = f"{str(e.id)}|0|0"
         xe = True
     await e.reply(
         file=types.InputDocument(c[0], c[1], c[2]),

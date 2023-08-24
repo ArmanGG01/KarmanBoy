@@ -45,14 +45,7 @@ def approve(update, context):
         f"[{member.user['first_name']}](tg://user?id={member.user['id']}) telah disetujui di {chat_title}! Mereka sekarang akan diabaikan oleh tindakan admin otomatis seperti kunci, daftar blokir, dan antiflood.",
         parse_mode=ParseMode.MARKDOWN,
     )
-    log_message = (
-        f"<b>{html.escape(chat.title)}:</b>\n"
-        f"#APPROVED\n"
-        f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-        f"<b>User:</b> {mention_html(member.user.id, member.user.first_name)}"
-    )
-
-    return log_message
+    return f"<b>{html.escape(chat.title)}:</b>\n#APPROVED\n<b>Admin:</b> {mention_html(user.id, user.first_name)}\n<b>User:</b> {mention_html(member.user.id, member.user.first_name)}"
 
 
 @loggable
@@ -83,14 +76,7 @@ def disapprove(update, context):
     message.reply_text(
         f"{member.user['first_name']} tidak lagi disetujui di {chat_title}.",
     )
-    log_message = (
-        f"<b>{html.escape(chat.title)}:</b>\n"
-        f"#UNAPPROVED\n"
-        f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-        f"<b>User:</b> {mention_html(member.user.id, member.user.first_name)}"
-    )
-
-    return log_message
+    return f"<b>{html.escape(chat.title)}:</b>\n#UNAPPROVED\n<b>Admin:</b> {mention_html(user.id, user.first_name)}\n<b>User:</b> {mention_html(member.user.id, member.user.first_name)}"
 
 
 @user_admin
